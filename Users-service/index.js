@@ -72,13 +72,13 @@ app.post("/user/signup",async(req,res)=>{
 
     const userExists = await User.findOne({email});
     if (userExists){
-        return res.json({"message":"User already exists"});
+        return res.status(409).send({"message":"User already exists"});
     }else{
         const newUser = new User({
             name,phone,email,password
         });
         newUser.save()
-        return res.json({"message":"User created successfully"});
+        return res.status(201).send({"message":"User created successfully"});
     }
 
 })
@@ -94,10 +94,10 @@ app.post("/user/login",async(req,res)=>{
 
     const user = await User.findOne({email});
     if(!user){
-        res.send({"message":"User doesn't exist"})
+        res.status(404).send({"msg":"User not found"});
     }else{
         if(password!=user.password){
-            return res.json({"message":"Incorrect password"});
+            return res.status(401).send({"msg":"Incorrect password"});
         }
 
         //creating payload for jwt
@@ -114,7 +114,7 @@ app.post("/user/login",async(req,res)=>{
             }
             else{
                 res.cookie('token', token, { httpOnly: true });
-                return res.json({token:token});
+                return res.status(200).send({"msg":"Login Successfull"});
             }
         });
     }
@@ -127,7 +127,7 @@ app.post("/user/login",async(req,res)=>{
 app.get("/user/logout/",verifyToken,(req,res)=>{
     console.log("logout service")
     
-    return res.cookie('token','',{maxAge:1,httpOnly:true}).json({"msg":"Logged out successfully"})
+    return res.status(200).cookie('token','',{maxAge:1,httpOnly:true}).json({"msg":"Logged out successfully"})
     
     
     //res.send("Logged out successfully")
@@ -159,7 +159,7 @@ app.get("/user/fetch/",verifyToken,async(req,res)=>{
 
 app.get("/user/list",verifyToken,async(req,res)=>{
     const user_list = await User.find();
-    return res.json({"users":user_list});
+    return res.status(200).send({"users":user_list});
 })
 
 
